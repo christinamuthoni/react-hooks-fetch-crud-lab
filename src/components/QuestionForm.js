@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, {useState } from "react";
+import QuestionList from "./QuestionList";
+import QuestionItem from "./QuestionItem";
 
-function QuestionForm(props) {
+function QuestionForm({onAddQuestion}) {
+
   const [formData, setFormData] = useState({
     prompt: "",
     answer1: "",
@@ -9,6 +12,19 @@ function QuestionForm(props) {
     answer4: "",
     correctIndex: 0,
   });
+  
+  function handleAddQuestionClick(){
+    fetch(`http://localhost:4000/questions/${question.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newQuestion),
+    })
+      .then((r) => r.json())
+      .then((updatedQuestion) => onUpdateQuestion(updatedQuestion));
+  }
+  
 
   function handleChange(event) {
     setFormData({
@@ -19,13 +35,32 @@ function QuestionForm(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(formData);
-  }
+    //console.log(formData);
+    const formData = {
+      id: 1,
+      prompt: prompt,
+      answers: [],
+      correctIndex: 0,
+    };
+   
+    fetch('http://localhost:4000/questions',{
+      method: "POST",
+      headers:
+        { "Content-Type": "application/json" },
+
+    body: JSON.stringify(formData),
+     
+    })
+      .then((r) =>r.json())
+      .then((newQuestion) => onAddQuestion(newQuestion));
+  }  
+
+
 
   return (
     <section>
       <h1>New Question</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} > 
         <label>
           Prompt:
           <input
@@ -84,8 +119,10 @@ function QuestionForm(props) {
             <option value="3">{formData.answer4}</option>
           </select>
         </label>
-        <button type="submit">Add Question</button>
+        <button type="submit" onClick={handleAddQuestionClick}>Add Question</button>
       </form>
+      <QuestionItem />
+      <QuestionList />
     </section>
   );
 }
